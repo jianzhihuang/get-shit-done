@@ -4,7 +4,7 @@
 
 **English** · [Português](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja-JP.md) · [한국어](README.ko-KR.md)
 
-**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini CLI, Codex, Copilot, Cursor, Windsurf, Antigravity, and Augment.**
+**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini CLI, Kilo, Codex, Copilot, Cursor, Windsurf, Antigravity, and Augment.**
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
@@ -84,12 +84,12 @@ npx get-shit-done-cc@latest
 ```
 
 The installer prompts you to choose:
-1. **Runtime** — Claude Code, OpenCode, Gemini, Codex, Copilot, Cursor, Windsurf, Antigravity, Augment, or all (interactive multi-select — pick multiple runtimes in a single install session)
+1. **Runtime** — Claude Code, OpenCode, Gemini, Kilo, Codex, Copilot, Cursor, Windsurf, Antigravity, Augment, or all (interactive multi-select — pick multiple runtimes in a single install session)
 2. **Location** — Global (all projects) or local (current project only)
 
 Verify with:
 - Claude Code / Gemini / Copilot / Antigravity: `/gsd:help`
-- OpenCode / Augment: `/gsd-help`
+- OpenCode / Kilo / Augment: `/gsd-help`
 - Codex: `$gsd-help`
 
 > [!NOTE]
@@ -117,6 +117,10 @@ npx get-shit-done-cc --opencode --global # Install to ~/.config/opencode/
 # Gemini CLI
 npx get-shit-done-cc --gemini --global   # Install to ~/.gemini/
 
+# Kilo (OpenCode fork)
+npx get-shit-done-cc --kilo --global     # Install to ~/.config/kilo/
+npx get-shit-done-cc --kilo --local      # Install to ./.kilo/
+
 # Codex (skills-first)
 npx get-shit-done-cc --codex --global    # Install to ~/.codex/
 npx get-shit-done-cc --codex --local     # Install to ./.codex/
@@ -137,12 +141,16 @@ npx get-shit-done-cc --windsurf --local     # Install to ./.windsurf/
 npx get-shit-done-cc --antigravity --global # Install to ~/.gemini/antigravity/
 npx get-shit-done-cc --antigravity --local  # Install to ./.agent/
 
+# Augment
+npx get-shit-done-cc --augment --global     # Install to ~/.augment/
+npx get-shit-done-cc --augment --local      # Install to ./.augment/
+
 # All runtimes
 npx get-shit-done-cc --all --global      # Install to all directories
 ```
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt.
-Use `--claude`, `--opencode`, `--gemini`, `--codex`, `--copilot`, `--cursor`, `--windsurf`, `--antigravity`, or `--all` to skip the runtime prompt.
+Use `--claude`, `--opencode`, `--gemini`, `--kilo`, `--codex`, `--copilot`, `--cursor`, `--windsurf`, `--antigravity`, `--augment`, or `--all` to skip the runtime prompt.
 Use `--sdk` to also install the GSD SDK CLI (`gsd-sdk`) for headless autonomous execution.
 
 </details>
@@ -793,21 +801,25 @@ To remove GSD completely:
 npx get-shit-done-cc --claude --global --uninstall
 npx get-shit-done-cc --opencode --global --uninstall
 npx get-shit-done-cc --gemini --global --uninstall
+npx get-shit-done-cc --kilo --global --uninstall
 npx get-shit-done-cc --codex --global --uninstall
 npx get-shit-done-cc --copilot --global --uninstall
 npx get-shit-done-cc --cursor --global --uninstall
 npx get-shit-done-cc --windsurf --global --uninstall
 npx get-shit-done-cc --antigravity --global --uninstall
+npx get-shit-done-cc --augment --global --uninstall
 
 # Local installs (current project)
 npx get-shit-done-cc --claude --local --uninstall
 npx get-shit-done-cc --opencode --local --uninstall
 npx get-shit-done-cc --gemini --local --uninstall
+npx get-shit-done-cc --kilo --local --uninstall
 npx get-shit-done-cc --codex --local --uninstall
 npx get-shit-done-cc --copilot --local --uninstall
 npx get-shit-done-cc --cursor --local --uninstall
 npx get-shit-done-cc --windsurf --local --uninstall
 npx get-shit-done-cc --antigravity --local --uninstall
+npx get-shit-done-cc --augment --local --uninstall
 ```
 
 This removes all GSD commands, agents, hooks, and settings while preserving your other configurations.
@@ -816,7 +828,7 @@ This removes all GSD commands, agents, hooks, and settings while preserving your
 
 ## Community Ports
 
-OpenCode, Gemini CLI, and Codex are now natively supported via `npx get-shit-done-cc`.
+OpenCode, Gemini CLI, Kilo, and Codex are now natively supported via `npx get-shit-done-cc`.
 
 These community ports pioneered multi-runtime support:
 
