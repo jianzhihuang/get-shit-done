@@ -4285,8 +4285,8 @@ function uninstall(isGlobal, runtime = 'claude') {
         }
       }
     }
-  } else {
-    // Claude Code: remove skills/gsd-*/ directories
+  } else if (isGlobal) {
+    // Claude Code global: remove skills/gsd-*/ directories (primary global install location)
     const skillsDir = path.join(targetDir, 'skills');
     if (fs.existsSync(skillsDir)) {
       let skillCount = 0;
@@ -4303,7 +4303,7 @@ function uninstall(isGlobal, runtime = 'claude') {
       }
     }
 
-    // Also clean up legacy commands/gsd/ from older installs
+    // Also clean up legacy commands/gsd/ from older global installs
     const legacyCommandsDir = path.join(targetDir, 'commands', 'gsd');
     if (fs.existsSync(legacyCommandsDir)) {
       // Preserve user-generated files before legacy wipe (#1423)
@@ -4317,6 +4317,28 @@ function uninstall(isGlobal, runtime = 'claude') {
       if (preservedDevPrefs) {
         try {
           fs.mkdirSync(legacyCommandsDir, { recursive: true });
+          fs.writeFileSync(devPrefsPath, preservedDevPrefs);
+          console.log(`  ${green}✓${reset} Preserved commands/gsd/dev-preferences.md`);
+        } catch (err) {
+          console.error(`  ${red}✗${reset} Failed to restore dev-preferences.md: ${err.message}`);
+        }
+      }
+    }
+  } else {
+    // Claude Code local: remove commands/gsd/ (primary local install location since #1736)
+    const gsdCommandsDir = path.join(targetDir, 'commands', 'gsd');
+    if (fs.existsSync(gsdCommandsDir)) {
+      // Preserve user-generated files before wipe (#1423)
+      const devPrefsPath = path.join(gsdCommandsDir, 'dev-preferences.md');
+      const preservedDevPrefs = fs.existsSync(devPrefsPath) ? fs.readFileSync(devPrefsPath, 'utf-8') : null;
+
+      fs.rmSync(gsdCommandsDir, { recursive: true });
+      removedCount++;
+      console.log(`  ${green}✓${reset} Removed commands/gsd/`);
+
+      if (preservedDevPrefs) {
+        try {
+          fs.mkdirSync(gsdCommandsDir, { recursive: true });
           fs.writeFileSync(devPrefsPath, preservedDevPrefs);
           console.log(`  ${green}✓${reset} Preserved commands/gsd/dev-preferences.md`);
         } catch (err) {
@@ -5168,8 +5190,8 @@ function install(isGlobal, runtime = 'claude') {
     } else {
       failures.push('commands/gsd');
     }
-  } else {
-    // Claude Code: skills/ format (2.1.88+ compatibility)
+  } else if (isGlobal) {
+    // Claude Code global: skills/ format (2.1.88+ compatibility)
     const skillsDir = path.join(targetDir, 'skills');
     const gsdSrc = path.join(src, 'commands', 'gsd');
     copyCommandsAsClaudeSkills(gsdSrc, skillsDir, 'gsd', pathPrefix, runtime, isGlobal);
@@ -5185,11 +5207,38 @@ function install(isGlobal, runtime = 'claude') {
       failures.push('skills/gsd-*');
     }
 
-    // Clean up legacy commands/gsd/ from previous installs
+    // Clean up legacy commands/gsd/ from previous global installs
     const legacyCommandsDir = path.join(targetDir, 'commands', 'gsd');
     if (fs.existsSync(legacyCommandsDir)) {
       fs.rmSync(legacyCommandsDir, { recursive: true });
       console.log(`  ${green}✓${reset} Removed legacy commands/gsd/ directory`);
+    }
+  } else {
+    // Claude Code local: commands/gsd/ format — Claude Code reads local project
+    // commands from .claude/commands/gsd/, not .claude/skills/
+    const commandsDir = path.join(targetDir, 'commands');
+    fs.mkdirSync(commandsDir, { recursive: true });
+    const gsdSrc = path.join(src, 'commands', 'gsd');
+    const gsdDest = path.join(commandsDir, 'gsd');
+    copyWithPathReplacement(gsdSrc, gsdDest, pathPrefix, runtime, true, isGlobal);
+    if (verifyInstalled(gsdDest, 'commands/gsd')) {
+      const count = fs.readdirSync(gsdDest).filter(f => f.endsWith('.md')).length;
+      console.log(`  ${green}✓${reset} Installed ${count} commands to commands/gsd/`);
+    } else {
+      failures.push('commands/gsd');
+    }
+
+    // Clean up any stale skills/ from a previous local install
+    const staleSkillsDir = path.join(targetDir, 'skills');
+    if (fs.existsSync(staleSkillsDir)) {
+      const staleGsd = fs.readdirSync(staleSkillsDir, { withFileTypes: true })
+        .filter(e => e.isDirectory() && e.name.startsWith('gsd-'));
+      for (const e of staleGsd) {
+        fs.rmSync(path.join(staleSkillsDir, e.name), { recursive: true });
+      }
+      if (staleGsd.length > 0) {
+        console.log(`  ${green}✓${reset} Removed ${staleGsd.length} stale GSD skill(s) from skills/`);
+      }
     }
   }
 
